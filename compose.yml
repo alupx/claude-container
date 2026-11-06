@@ -7,6 +7,10 @@ services:
     stdin_open: true
     tty: true
     userns_mode: keep-id
+    environment:
+      # Tell tmux that the outer terminal supports 256 colors and true color
+      TERM: xterm-256color
+      COLORTERM: truecolor
     #profiles:
     # Check this
     #- auth-workspace

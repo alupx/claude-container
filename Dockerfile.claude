@@ -18,7 +18,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   dnsutils \
   aggregate \
   jq \
-  #vim \
+  vim \
+  tmux \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Ensure default node user has access to /usr/local/share
@@ -36,6 +37,19 @@ RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhisto
 # Set `DEVCONTAINER` environment variable to help with orientation
 ENV DEVCONTAINER=true
 
+# Use a UTF-8 locale.
+ENV LANG=C.UTF-8 \
+  LC_ALL=C.UTF-8
+
+# Configure tmux for 256 colors, true color and fast escape key
+RUN printf '%s\n' \
+  'set -g default-terminal "tmux-256color"' \
+  'set -as terminal-features ",xterm*:RGB"' \
+  'set -as terminal-overrides ",xterm*:Tc"' \
+  'set -sg escape-time 10' \
+  'set -g focus-events on' \
+  > /etc/tmux.conf
+
 # Create workspace and config directories and set permissions
 RUN mkdir -p /workspace /home/node/.claude && \
   chown -R node:node /workspace /home/node/.claude
@@ -52,4 +66,4 @@ ENV PATH=$PATH:/usr/local/share/npm-global/bin
 # Install Claude
 RUN npm install -g @anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}
 
-CMD ["claude", "--dangerously-skip-permissions"]
+CMD ["tmux", "-u", "new-session", "claude"]
